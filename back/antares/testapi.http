@@ -1,0 +1,6 @@
+###1
+GET http://127.0.0.1:8000/matrix
+
+###2
+GET http://127.0.0.1:8000/matrix?rows=10&cols=10
+
