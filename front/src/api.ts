@@ -1,7 +1,10 @@
 import {Table, tableFromIPC, tableToIPC} from "apache-arrow";
 import {MatrixType} from "./matrices";
 
-export function postArrowTable(name: string, table: Table): Promise<Response> {
+
+export type MatrixStorageFormat = 'hdf5' | 'tsv';
+
+export function postArrowTable(name: string, format: MatrixStorageFormat, table: Table): Promise<Response> {
     const ints = tableToIPC(table, "file");
     const blob = new Blob([ints], {type: "application/octet-stream"});
     const requestOptions = {
@@ -9,26 +12,26 @@ export function postArrowTable(name: string, table: Table): Promise<Response> {
         headers: { 'Content-Type': 'application/octet-stream' },
         body: blob,
     };
-    return fetch(`http://localhost:8000/matrix/arrow?name=${name}`, requestOptions);
+    return fetch(`http://localhost:8000/matrix/arrow?name=${name}&storage_format=${format}`, requestOptions);
 }
 
-export function postJsonMatrix(name: string, matrix: MatrixType): Promise<Response> {
+export function postJsonMatrix(name: string, format: MatrixStorageFormat, matrix: MatrixType): Promise<Response> {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(matrix),
     };
-    return fetch(`http://localhost:8000/matrix/json?name=${name}`, requestOptions);
+    return fetch(`http://localhost:8000/matrix/json?name=${name}&storage_format=${format}`, requestOptions);
 }
 
 
-export function getArrowTable(name: string): Promise<Table> {
+export function getArrowTable(name: string, format: MatrixStorageFormat): Promise<Table> {
     return tableFromIPC(
-        fetch(`http://localhost:8000/matrix/arrow?name=${name}`));
+        fetch(`http://localhost:8000/matrix/arrow?name=${name}&storage_format=${format}`));
 }
 
-export function getMatrix(name: string ): Promise<MatrixType> {
-    return fetch(`http://localhost:8000/matrix/json?name=${name}`)
+export function getJsonMatrix(name: string, format: MatrixStorageFormat): Promise<MatrixType> {
+    return fetch(`http://localhost:8000/matrix/json?name=${name}&storage_format=${format}`)
         .then((r) => {
             return r.json() as Promise<MatrixType>
         });

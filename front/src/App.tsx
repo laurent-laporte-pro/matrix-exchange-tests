@@ -15,7 +15,7 @@ import {
   Stack,
   TextField
 } from "@mui/material";
-import {generateTable, getArrowTable, getMatrix, postArrowTable, postJsonMatrix} from "./api";
+import {generateTable, getArrowTable, getJsonMatrix, MatrixStorageFormat, postArrowTable, postJsonMatrix} from "./api";
 import {arrowTableToMatrix, matrixToArrowTable, matrixToGlide, MatrixType} from "./matrices";
 
 interface TableGetterProps {
@@ -78,6 +78,29 @@ function TransferFormatChoice(props: TransferFormatChoiceProps) {
   )
 }
 
+interface StorageFormatChoiceProps {
+    format: MatrixStorageFormat;
+    onChange: (format: MatrixStorageFormat) => void;
+}
+
+function StorageFormatChoice(props: StorageFormatChoiceProps) {
+    return (
+        <FormControl variant="outlined">
+            <FormLabel id="demo-row-radio-buttons-group-label">Storage format</FormLabel>
+            <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                value={props.format}
+                onChange={(ev) => props.onChange(ev.target.value as MatrixStorageFormat)}
+            >
+                <FormControlLabel value="hdf5" control={<Radio />} label="HDF5" />
+                <FormControlLabel value="tsv" control={<Radio />} label="TSV" />
+            </RadioGroup>
+        </FormControl>
+    )
+}
+
 
 interface MatrixManagerProps {
   onMatrixChange: (matrix: MatrixType) => void;
@@ -86,45 +109,47 @@ interface MatrixManagerProps {
 
 function MatrixManager(props: MatrixManagerProps) {
 
-  const [format, setFormat] = useState<MatrixTransferFormat>("json");
-  const [matrixName, setMatrixName] = useState("");
+    const [format, setFormat] = useState<MatrixTransferFormat>("json");
+    const [storageFormat, setStorageFormat] = useState<MatrixStorageFormat>("hdf5");
+    const [matrixName, setMatrixName] = useState("");
 
-  function fetchMatrix() {
-    let matrix: Promise<MatrixType> | null = null;
-    switch (format) {
-      case "json":
-        matrix = getMatrix(matrixName);
-        break;
-      case "arrow":
-        matrix = getArrowTable(matrixName).then(t => arrowTableToMatrix(t));
-        break;
+    function fetchMatrix() {
+        let matrix: Promise<MatrixType> | null = null;
+        switch (format) {
+            case "json":
+                matrix = getJsonMatrix(matrixName, storageFormat);
+                break;
+            case "arrow":
+                matrix = getArrowTable(matrixName, storageFormat).then(t => arrowTableToMatrix(t));
+                break;
+        }
+        matrix?.then(m => props.onMatrixChange(m));
     }
-    matrix?.then(m => props.onMatrixChange(m));
-  }
 
-  function post() {
-      switch (format) {
-          case "json":
-              return postJsonMatrix(matrixName, props.matrix);
-          case "arrow":
-              const table = matrixToArrowTable(props.matrix);
-              return postArrowTable(matrixName, table)
-      }
-  }
+    function post() {
+        switch (format) {
+            case "json":
+                return postJsonMatrix(matrixName, storageFormat, props.matrix);
+            case "arrow":
+                const table = matrixToArrowTable(props.matrix);
+                return postArrowTable(matrixName, storageFormat, table)
+        }
+    }
 
-  return (
-      <Stack direction="row" spacing={2}>
-        <TextField
-            size="small"
-            value={matrixName}
-            label="Matrix name"
-            onChange={(e) => setMatrixName(e.target.value)}
-        />
-        <TransferFormatChoice format={format} onChange={setFormat}/>
-        <Button variant="outlined" onClick={fetchMatrix} disabled={matrixName.length == 0}>Get</Button>
-        <Button variant="outlined" onClick={post}>Post</Button>
-      </Stack>
-  );
+    return (
+        <Stack direction="row" spacing={2}>
+            <TextField
+                size="small"
+                value={matrixName}
+                label="Matrix name"
+                onChange={(e) => setMatrixName(e.target.value)}
+            />
+            <TransferFormatChoice format={format} onChange={setFormat}/>
+            <StorageFormatChoice format={storageFormat} onChange={setStorageFormat}/>
+            <Button variant="outlined" onClick={fetchMatrix} disabled={matrixName.length == 0}>Get</Button>
+            <Button variant="outlined" onClick={post} disabled={matrixName.length == 0}>Post</Button>
+        </Stack>
+    );
 }
 
 function FullApp() {
