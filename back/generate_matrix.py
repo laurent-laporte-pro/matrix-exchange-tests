@@ -8,7 +8,8 @@ def main():
     file = matrix_dir / "classic"
     cols = 200
     rows = 8760
-    matrix = pd.DataFrame(np.random.randint(0, 100, size=(rows, cols)), columns=[str(i) for i in range(0, cols)], dtype=np.int32)
+    matrix = pd.DataFrame(np.random.random(size=(rows, cols)) * 1000, columns=[str(i) for i in range(0, cols)], dtype=np.float32)
+    matrix = matrix.round(decimals=1)
     matrix.to_hdf(file, 'data')
 
 
