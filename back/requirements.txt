@@ -6,3 +6,4 @@ pyarrow
 tables
 pydantic~=1.9.0
 pytest
+typing-extensions; python_version <= "3.8"

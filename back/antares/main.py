@@ -1,14 +1,18 @@
 import io
 from pathlib import Path
-from typing import List, Union, cast, Annotated
 
+try:
+    import typing_extensions as t
+except ImportError:
+    import typing as t
+
+import numpy as np
+import pandas as pd
 import starlette.exceptions
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
-import numpy as np
-import pandas as pd
 
 app = FastAPI()
 
@@ -54,9 +58,9 @@ class MatrixContent(BaseModel):
         columns: A list of columns indexes or names.
     """
 
-    data: List[List[MatrixData]]
-    index: List[Union[int, str]]
-    columns: List[Union[int, str]]
+    data: t.List[t.List[MatrixData]]
+    index: t.List[t.Union[int, str]]
+    columns: t.List[t.Union[int, str]]
 
 
 @app.get("/matrix/json")
@@ -121,7 +125,7 @@ def read_dataframe(name: str, format: str) -> pd.DataFrame:
 
 
 @app.post("/matrix/arrow")
-async def post_matrix_file(content: Annotated[bytes, Body(media_type="application/octet-stream")], name: str, storage_format: str = "hdf5"):
+async def post_matrix_file(content: t.Annotated[bytes, Body(media_type="application/octet-stream")], name: str, storage_format: str = "hdf5"):
     with io.BytesIO(content) as buffer:
         matrix = pd.read_feather(buffer)
     try:
