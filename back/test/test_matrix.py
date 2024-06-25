@@ -1,11 +1,9 @@
-from pathlib import Path
-
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pyarrow as pa
 
 from antares.main import to_dto
+from config import MATRIX_DIR
 
 
 def test():
@@ -16,12 +14,9 @@ def test():
 
 
 def test_read_file():
-    matrix_dir = Path("/home/leclercsyl/feature_tests/antares/apache-arrow/matrices")
-
-    test_file = matrix_dir / "test"
+    test_file = MATRIX_DIR / "test.arrow"
 
     with pa.ipc.open_file(test_file) as reader:
 
        num_record_batches = reader.num_record_batches
        print(num_record_batches)
-
