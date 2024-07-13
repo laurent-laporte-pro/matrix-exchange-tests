@@ -146,8 +146,8 @@ function MatrixManager(props: MatrixManagerProps) {
             />
             <TransferFormatChoice format={format} onChange={setFormat}/>
             <StorageFormatChoice format={storageFormat} onChange={setStorageFormat}/>
-            <Button variant="outlined" onClick={fetchMatrix} disabled={matrixName.length == 0}>Get</Button>
-            <Button variant="outlined" onClick={post} disabled={matrixName.length == 0}>Post</Button>
+            <Button variant="outlined" onClick={fetchMatrix} disabled={matrixName.length === 0}>Get</Button>
+            <Button variant="outlined" onClick={post} disabled={matrixName.length === 0}>Post</Button>
         </Stack>
     );
 }
